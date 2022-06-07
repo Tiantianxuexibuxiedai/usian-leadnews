@@ -1,0 +1,14 @@
+server:
+  port: 9091
+spring:
+  application:
+    name: usian-leadnews-admin
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/leadnews_admin?useSSL=true&characterEncoding=utf-8
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848

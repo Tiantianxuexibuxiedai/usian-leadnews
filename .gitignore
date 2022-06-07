@@ -1,0 +1,5 @@
+# Project exclude paths
+/usian-leadnews-apis/target/
+/usian-leadnews-common/target/
+/usian-leadnews-model/target/
+/usian-leadnews-utils/target/

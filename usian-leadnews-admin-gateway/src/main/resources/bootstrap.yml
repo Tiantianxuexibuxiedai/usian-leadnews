@@ -1,0 +1,28 @@
+server:
+  port: 9999
+spring:
+  application:
+    name: usian-leadnews-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]': # 匹配所有请求
+            allowedOrigins: "*" #跨域处理 允许所有的域
+            allowedMethods: # 支持的方法
+              - GET
+              - POST
+              - PUT
+              - DELETE
+      routes:
+        - id: usian-leadnews-admin
+          uri: lb://usian-leadnews-admin
+          predicates:
+            - Path=/admin/**
+          filters:
+            - StripPrefix= 1
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+
+
