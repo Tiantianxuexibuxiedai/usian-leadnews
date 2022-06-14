@@ -17,6 +17,7 @@
         <module>usian-leadnews-user</module>
         <module>usian-leadnews-admin-gateway</module>
         <module>usian-leadnews-wemedia</module>
+        <module>usain-leadnews-seata</module>
         <module>usian-leadnews-article</module>
     </modules>
 

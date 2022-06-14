@@ -39,13 +39,6 @@ public class ApAuthorAddDto implements Serializable {
      */
 
     private Integer userId;
-
-    /**
-     * 创建时间
-     */
-
-    private Date createdTime;
-
     /**
      * 自媒体账号
      */

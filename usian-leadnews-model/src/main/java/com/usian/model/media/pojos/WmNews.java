@@ -54,7 +54,7 @@ public class WmNews implements Serializable {
             3 多图文章
      */
     @TableField("type")
-    private Short type;
+    private Integer type;
 
     /**
      * 图文频道ID
@@ -88,7 +88,7 @@ public class WmNews implements Serializable {
             9 已发布
      */
     @TableField("status")
-    private Short status;
+    private Integer status;
 
     /**
      * 定时发布时间，不定时则为空
@@ -115,7 +115,7 @@ public class WmNews implements Serializable {
     private String images;
 
     @TableField("enable")
-    private Short enable;
+    private Boolean enable;
     
      //状态枚举类
     @Alias("WmNewsStatus")

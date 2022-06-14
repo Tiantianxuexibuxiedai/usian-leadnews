@@ -34,8 +34,8 @@ public class ChannelAddDto {
     /**
      * 创建时间
      */
-
-    private String createdTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    private Date createdTime;
 
 
     private Boolean is_delete;

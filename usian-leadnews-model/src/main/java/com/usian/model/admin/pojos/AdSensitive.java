@@ -38,6 +38,6 @@ public class AdSensitive implements Serializable {
      * 创建时间
      */
     @TableField("created_time")
-    private String createdTime;
+    private Date createdTime;
 
 }

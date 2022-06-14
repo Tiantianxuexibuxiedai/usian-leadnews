@@ -46,13 +46,13 @@ public class WmMaterial implements Serializable {
             1 视频
      */
     @TableField("type")
-    private Short type;
+    private Integer type;
 
     /**
      * 是否收藏
      */
     @TableField("is_collection")
-    private Short isCollection;
+    private Boolean isCollection;
 
     /**
      * 创建时间

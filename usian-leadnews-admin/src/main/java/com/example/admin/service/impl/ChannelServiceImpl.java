@@ -104,4 +104,9 @@ public class ChannelServiceImpl implements ChannelService {
         channelMapper.updateById(adChannel);
         return PageResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
+
+    @Override
+    public List<AdChannel> findAll() {
+        return channelMapper.selectList(null);
+    }
 }

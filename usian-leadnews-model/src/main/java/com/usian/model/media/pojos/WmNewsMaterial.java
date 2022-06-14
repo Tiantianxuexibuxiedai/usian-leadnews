@@ -45,12 +45,12 @@ public class WmNewsMaterial implements Serializable {
             1 主图引用
      */
     @TableField("type")
-    private Short type;
+    private Integer type;
 
     /**
      * 引用排序
      */
     @TableField("ord")
-    private Short ord;
+    private Integer ord;
 
 }
