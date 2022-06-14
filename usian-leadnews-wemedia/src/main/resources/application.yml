@@ -1,0 +1,20 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: usian-leadnews-wemedia
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/leadnews_wemedia?useSSL=true&characterEncoding=utf-8
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    alibaba:
+      seata:
+        tx-service-group: usian-leadnews-wemedia_tx_group
+file:
+  path: d:\\img\
+fileServerUrl: http://192.168.200.130/
