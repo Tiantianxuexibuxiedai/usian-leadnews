@@ -3,6 +3,12 @@ server:
 spring:
   application:
     name: usian-leadnews-wemedia
+  kafka:
+    bootstrap-servers: 192.168.200.130:9092
+    producer:
+      retries: 10
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/leadnews_wemedia?useSSL=true&characterEncoding=utf-8
     username: root

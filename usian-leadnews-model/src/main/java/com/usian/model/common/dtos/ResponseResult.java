@@ -17,7 +17,7 @@ public class ResponseResult<T> implements Serializable {
 
     private Integer code;
 
-    private String errorMessage;
+    private String Message;
 
     private T data;
 
@@ -32,13 +32,13 @@ public class ResponseResult<T> implements Serializable {
 
     public ResponseResult(Integer code, String msg, T data) {
         this.code = code;
-        this.errorMessage = msg;
+        this.Message = msg;
         this.data = data;
     }
 
     public ResponseResult(Integer code, String msg) {
         this.code = code;
-        this.errorMessage = msg;
+        this.Message = msg;
     }
 
     public static ResponseResult errorResult(int code, String msg) {
@@ -63,21 +63,21 @@ public class ResponseResult<T> implements Serializable {
         return setAppHttpCodeEnum(enums,enums.getErrorMessage());
     }
 
-    public static ResponseResult errorResult(AppHttpCodeEnum enums, String errorMessage){
-        return setAppHttpCodeEnum(enums,errorMessage);
+    public static ResponseResult errorResult(AppHttpCodeEnum enums, String Message){
+        return setAppHttpCodeEnum(enums,Message);
     }
 
     public static ResponseResult setAppHttpCodeEnum(AppHttpCodeEnum enums){
         return okResult(enums.getCode(),enums.getErrorMessage());
     }
 
-    private static ResponseResult setAppHttpCodeEnum(AppHttpCodeEnum enums, String errorMessage){
-        return okResult(enums.getCode(),errorMessage);
+    private static ResponseResult setAppHttpCodeEnum(AppHttpCodeEnum enums, String Message){
+        return okResult(enums.getCode(),Message);
     }
 
     public ResponseResult<?> error(Integer code, String msg) {
         this.code = code;
-        this.errorMessage = msg;
+        this.Message = msg;
         return this;
     }
 
@@ -90,7 +90,7 @@ public class ResponseResult<T> implements Serializable {
     public ResponseResult<?> ok(Integer code, T data, String msg) {
         this.code = code;
         this.data = data;
-        this.errorMessage = msg;
+        this.Message = msg;
         return this;
     }
 
@@ -108,11 +108,11 @@ public class ResponseResult<T> implements Serializable {
     }
 
     public String getErrorMessage() {
-        return errorMessage;
+        return Message;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setErrorMessage(String Message) {
+        this.Message = Message;
     }
 
     public T getData() {

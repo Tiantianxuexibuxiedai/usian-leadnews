@@ -116,6 +116,8 @@ public class WmNews implements Serializable {
 
     @TableField("enable")
     private Boolean enable;
+    @TableField("is_delete")
+    private Boolean isDelete;
     
      //状态枚举类
     @Alias("WmNewsStatus")

@@ -26,6 +26,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>2.2.10.RELEASE</version>
+        </dependency>
         <!--引入model模块-->
         <dependency>
             <groupId>com.usian</groupId>

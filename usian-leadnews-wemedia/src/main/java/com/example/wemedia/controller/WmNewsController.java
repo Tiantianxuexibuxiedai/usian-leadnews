@@ -1,5 +1,6 @@
 package com.example.wemedia.controller;
 
+import com.example.wemedia.constants.CommonConstant;
 import com.example.wemedia.feign.AdminFeign;
 import com.example.wemedia.service.WmNewsService;
 import com.example.wemedia.utils.FastDFSClientUtil;
@@ -8,8 +9,10 @@ import com.usian.model.common.dtos.ResponseResult;
 import com.usian.model.common.enums.AppHttpCodeEnum;
 import com.usian.model.media.dtos.WmNewsDto;
 import com.usian.model.media.dtos.WmNewsPageReqDto;
+import com.usian.model.media.pojos.WmNews;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +32,8 @@ public class WmNewsController {
     private AdminFeign adminFeign;
     @Autowired
     private FastDFSClientUtil fastDFSClientUtil;
+    @Autowired
+    private KafkaTemplate kafkaTemplate;
 
     /**
      * 根据参数查询文章列表
@@ -66,7 +71,13 @@ public class WmNewsController {
      */
     @PostMapping("/addWmNews")
     public ResponseResult addWmNews(@RequestBody WmNewsDto wmNewsDto) {
-        return wmNewsService.addWmNews(wmNewsDto);
+        WmNews wmNews = wmNewsService.addWmNews(wmNewsDto);
+        if (wmNews!=null){
+            //发送Kafka消息
+            kafkaTemplate.send(CommonConstant.WMNEWS_TOPIC, wmNews.getId());
+            return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+        }
+        return ResponseResult.errorResult(AppHttpCodeEnum.FALL);
     }
 
     //图片上传
@@ -76,4 +87,38 @@ public class WmNewsController {
         //拼接文件路径
         return ResponseResult.okResult(fileServerUrl + url);
     }
+
+    /**
+     * 根据文章id查询文章信息
+     *
+     * @param id
+     * @return
+     */
+    //@GetMapping("/queryWnNewsById/{id}")
+    @GetMapping("/queryWnNewsById")
+    //路径变量
+    //public WmNews queryWnNewsById(@PathVariable Integer id)
+    public WmNews queryWnNewsById(@RequestParam Integer id) {
+        return wmNewsService.queryWnNewsById(id);
+    }
+
+    /**
+     * 根据文章id删除文章信息
+     *
+     * @param id
+     */
+    @GetMapping("/deleteWnNewsById")
+    public ResponseResult deleteWnNewsById(@RequestParam Integer id) {
+        return wmNewsService.deleteWnNewsById(id);
+    }
+    /**
+     * 根据文章id修改文章信息
+     *
+     * @param id
+     */
+    @GetMapping("/updateWnNewsById")
+    public Boolean updateWnNewsById(@RequestParam Integer id,@RequestParam Integer status) {
+        return wmNewsService.updateWnNewsById(id,status);
+    }
 }
+

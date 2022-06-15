@@ -115,9 +115,14 @@ public class SensitiveWordUtil {
         list.add("法轮");
         list.add("法轮功");
         list.add("冰毒");
+        //初始敏感词字典
         initMap(list);
         String content="我是一个好人，并不会卖冰毒，也不操练法轮功,我真的不卖冰毒";
         Map<String, Integer> map = matchWords(content);
-        System.out.println(map);
+        //匹配敏感词
+        if (!map.isEmpty()){
+            System.out.println("存在敏感词，审核不通过");
+            System.out.println(map);
+        }
     }
 }

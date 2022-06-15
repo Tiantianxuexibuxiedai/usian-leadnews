@@ -8,7 +8,7 @@ import com.example.wemedia.mapper.WmMaterielMapper;
 import com.example.wemedia.mapper.WmNewsMapper;
 import com.example.wemedia.mapper.WmNewsMaterielMapper;
 import com.example.wemedia.service.WmNewsService;
-import com.sun.xml.internal.bind.v2.TODO;
+import com.example.wemedia.utils.FastDFSClientUtil;
 import com.usian.model.common.dtos.PageResponseResult;
 import com.usian.model.common.dtos.ResponseResult;
 import com.usian.model.common.enums.AppHttpCodeEnum;
@@ -41,6 +41,8 @@ public class WmNewsServiceImpl implements WmNewsService {
     private WmMaterielMapper wmMaterielMapper;
     @Autowired
     private WmNewsMaterielMapper wmNewsMaterielMapper;
+    @Autowired
+    private FastDFSClientUtil fastDFSClientUtil;
 
     @Override
     public ResponseResult queryWmNewsList(WmNewsPageReqDto wmNewsPageReqDto) {
@@ -74,9 +76,10 @@ public class WmNewsServiceImpl implements WmNewsService {
     }
 
     @Override
-    public ResponseResult addWmNews(WmNewsDto wmNewsDto) {
+    public WmNews addWmNews(WmNewsDto wmNewsDto) {
         if (wmNewsDto == null) {
-            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+            log.info("内容不合法");
+            return null;
         }
         WmNews wmNews = new WmNews();
         wmNews.setTitle(wmNewsDto.getTitle());
@@ -99,7 +102,8 @@ public class WmNewsServiceImpl implements WmNewsService {
             wmNews.setImages(images);
         }
         if (wmNewsDto.getContentDtoList() == null) {
-            return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST);
+            log.info("参数为空");
+            return null;
         }
         String content = JSON.toJSONString(wmNewsDto.getContentDtoList());
         wmNews.setContent(content);
@@ -146,21 +150,89 @@ public class WmNewsServiceImpl implements WmNewsService {
             }
         }*/
         //保存文章内容图片
-        saveNewsMaterial(imgList, wmNews.getId(),0);
+        saveNewsMaterial(imgList, wmNews.getId(), 0);
         List<String> images = wmNewsDto.getImages();
         //保存封面图片
-        saveNewsMaterial(images, wmNews.getId(),1);
+        saveNewsMaterial(images, wmNews.getId(), 1);
 
         if (insert > 0) {
+            return wmNews;
+        }
+        return null;
+    }
+
+    @Override
+    public WmNews queryWnNewsById(Integer id) {
+        return wmNewsMapper.selectById(id);
+    }
+
+    @Override
+    //图片不可以用同一个地址的，否则报500。
+    //com.github.tobato.fastdfs.exception.FdfsServerException: 错误码：2，错误信息：找不到节点或文件
+    public ResponseResult deleteWnNewsById(Integer id) {
+        if (id != null) {
+            log.info("id不可以为空");
+        }
+        //逻辑删除文章表
+        WmNews wmNews = wmNewsMapper.selectById(id);
+        wmNews.setIsDelete(true);
+        wmNewsMapper.updateById(wmNews);
+        //查询中间表
+        LambdaQueryWrapper<WmNewsMaterial> wmNewsMaterialLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        wmNewsMaterialLambdaQueryWrapper.eq(WmNewsMaterial::getNewsId, wmNews.getId());
+        //根据文章id在中间表查询出一个集合
+        List<WmNewsMaterial> wmNewsMaterialsList = wmNewsMaterielMapper.selectList(wmNewsMaterialLambdaQueryWrapper);
+        if (!CollectionUtils.isEmpty(wmNewsMaterialsList)) {
+            //在中间表循环出每一个文章id
+            for (WmNewsMaterial wmNewsMaterial : wmNewsMaterialsList) {
+                //删除素材表(如果一个素材被多个文章引用不可以删除)
+                Integer materialId = wmNewsMaterial.getMaterialId();
+                //在中间表中查询一个文章表对应的素材表id个数
+                LambdaQueryWrapper<WmNewsMaterial> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(WmNewsMaterial::getMaterialId, materialId);
+                //一个文章表对应的素材集合
+                List<WmNewsMaterial> materialList = wmNewsMaterielMapper.selectList(queryWrapper);
+                if (materialList.size() > 1) {
+                    log.info("别的文章引用此素材不可以删除");
+                } else {
+                    //素材fastdfs中素材
+                    WmMaterial wmMaterial = wmMaterielMapper.selectById(materialId);
+                    if (wmMaterial.getUrl() == null || wmMaterial.getUrl().equals("")) {
+                        log.info("素材路径不可以为空");
+                    } else {
+                        fastDFSClientUtil.delFile(wmMaterial.getUrl());
+                    }
+                    //只有一个文章引用素材可以删除
+                    wmMaterielMapper.deleteById(wmNewsMaterial.getMaterialId());
+                }
+                //删除中间表
+                wmNewsMaterielMapper.deleteById(wmNewsMaterial.getId());
+            }
             return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
         }
         return ResponseResult.errorResult(AppHttpCodeEnum.FALL);
     }
 
+    @Override
+    public Boolean updateWnNewsById(Integer id, Integer status) {
+        if (id == null || status == null) {
+            log.info("缺少参数:{},:{}", id, status);
+            return false;
+        }
+        WmNews wmNews = wmNewsMapper.selectById(id);
+        wmNews.setStatus(status);
+        int i = wmNewsMapper.updateById(wmNews);
+        if (i > 0) {
+            return true;
+        }
+        return false;
+    }
+
+
     /**
      * 封面图片保存在素材表和中间表
      */
-    public void saveNewsMaterial(List<String> imageUrlList, Integer newsId,Integer type) {
+    public void saveNewsMaterial(List<String> imageUrlList, Integer newsId, Integer type) {
         for (int i = 0; i < imageUrlList.size(); i++) {
             WmMaterial wmMaterial = new WmMaterial();
             String url = imageUrlList.get(i).replaceAll(fileServerUrl, "");

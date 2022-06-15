@@ -40,19 +40,19 @@ public class WmMaterielServiceImpl implements WmMaterielService {
         if (file == null) {
             return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
         }
-        String s = fastDFSClientUtil.uploadFile(file);
-        if (s == null || s.equals("")) {
+        String url = fastDFSClientUtil.uploadFile(file);
+        if (url == null || url.equals("")) {
             return ResponseResult.errorResult(AppHttpCodeEnum.FALL);
         }
         WmMaterial wmMaterial = new WmMaterial();
-        wmMaterial.setUrl(s);
+        wmMaterial.setUrl(url);
         wmMaterial.setCreatedTime(new Date());
         wmMaterial.setType(0);
         wmMaterial.setUserId(1);
         wmMaterial.setIsCollection(false);
         int insert = wmMaterielMapper.insert(wmMaterial);
         if (insert > 0) {
-            return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+            return ResponseResult.okResult(filepath + url);
         }
         return ResponseResult.errorResult(AppHttpCodeEnum.FALL);
     }
@@ -107,7 +107,7 @@ public class WmMaterielServiceImpl implements WmMaterielService {
     public Map subStringUrl(String url) {
         HashMap<String, String> map = new HashMap<>();
         int i = url.indexOf("/");
-        String group = url.substring(0,i);
+        String group = url.substring(0, i);
         log.info("------------>group:{}", group);
         String path = url.replaceAll(group + "/", "");
         map.put("group", group);
