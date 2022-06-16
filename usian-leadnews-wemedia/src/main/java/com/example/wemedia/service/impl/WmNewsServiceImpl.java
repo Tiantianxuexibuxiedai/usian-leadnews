@@ -187,10 +187,10 @@ public class WmNewsServiceImpl implements WmNewsService {
             for (WmNewsMaterial wmNewsMaterial : wmNewsMaterialsList) {
                 //删除素材表(如果一个素材被多个文章引用不可以删除)
                 Integer materialId = wmNewsMaterial.getMaterialId();
-                //在中间表中查询一个文章表对应的素材表id个数
+                //在中间表中查询一个素材表对应的文章表id个数
                 LambdaQueryWrapper<WmNewsMaterial> queryWrapper = new LambdaQueryWrapper<>();
                 queryWrapper.eq(WmNewsMaterial::getMaterialId, materialId);
-                //一个文章表对应的素材集合
+                //一个素材表对应的文章集合
                 List<WmNewsMaterial> materialList = wmNewsMaterielMapper.selectList(queryWrapper);
                 if (materialList.size() > 1) {
                     log.info("别的文章引用此素材不可以删除");

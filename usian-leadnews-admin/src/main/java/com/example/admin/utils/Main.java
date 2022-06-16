@@ -21,7 +21,7 @@ public class Main {
         IClientProfile profile = DefaultProfile
                 // pass 通过，review 不确定 block 不通过
                 //.getProfile("cn-shanghai", "LTAI4FmKL2EKYCGgN2az5M57", "XjgvRoAGzM3rWQxKWDJx98VWOmO0Hz");
-                .getProfile("cn-shanghai", "LTAI5tCT8XtShYeJN3aitBsB", "3F4PRn5CFGPDVG7et0LQOfKS5w7Ahi");
+                .getProfile("cn-shanghai", "LTAI5t8BvctyWxaj5xVUbB5k", "MgwAkZ4SJjCzu3fBnZ4KrKgWvdPGX2");
         DefaultProfile
                 .addEndpoint("cn-shanghai", "cn-shanghai", "Green", "green.cn-shanghai.aliyuncs.com");
         IAcsClient client = new DefaultAcsClient(profile);
@@ -37,7 +37,7 @@ public class Main {
         /**
          * 待检测的文本，长度不超过10000个字符。
          */
-        task1.put("content", "我是一个文本,买卖冰毒是违法的");
+        task1.put("content", "我是一个文本,买卖是违法的");
         tasks.add(task1);
         JSONObject data = new JSONObject();
 

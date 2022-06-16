@@ -9,13 +9,13 @@
         <outputRelativeToContentRoot value="true" />
         <module name="usian-leadnews-common" />
         <module name="heima-leadnews-admin" />
-        <module name="usian-leadnews-user" />
         <module name="usian-leadnews-apis" />
         <module name="usian-leadnews-admin" />
         <module name="usian-leadnews-admin-gateway" />
+        <module name="usian-leadnews-model" />
         <module name="usian-leadnews-utils" />
         <module name="usian-leadnews-article" />
-        <module name="usian-leadnews-model" />
+        <module name="usian-leadnews-user" />
         <module name="usain-leadnews-seata" />
         <module name="usian-leadnews-wemedia" />
       </profile>

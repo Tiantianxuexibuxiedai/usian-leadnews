@@ -10,6 +10,7 @@ import com.usian.model.common.enums.AppHttpCodeEnum;
 import com.usian.model.media.dtos.WmNewsDto;
 import com.usian.model.media.dtos.WmNewsPageReqDto;
 import com.usian.model.media.pojos.WmNews;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.util.List;
 
 //文章管理
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/wmNews")
 public class WmNewsController {
@@ -72,9 +74,10 @@ public class WmNewsController {
     @PostMapping("/addWmNews")
     public ResponseResult addWmNews(@RequestBody WmNewsDto wmNewsDto) {
         WmNews wmNews = wmNewsService.addWmNews(wmNewsDto);
-        if (wmNews!=null){
+        if (wmNews != null) {
             //发送Kafka消息
-            kafkaTemplate.send(CommonConstant.WMNEWS_TOPIC, wmNews.getId());
+            log.info(wmNews.getId().toString());
+            kafkaTemplate.send(CommonConstant.WM_NEWS_TOPIC, String.valueOf(wmNews.getId()));
             return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
         }
         return ResponseResult.errorResult(AppHttpCodeEnum.FALL);
@@ -111,14 +114,15 @@ public class WmNewsController {
     public ResponseResult deleteWnNewsById(@RequestParam Integer id) {
         return wmNewsService.deleteWnNewsById(id);
     }
+
     /**
      * 根据文章id修改文章信息
      *
      * @param id
      */
     @GetMapping("/updateWnNewsById")
-    public Boolean updateWnNewsById(@RequestParam Integer id,@RequestParam Integer status) {
-        return wmNewsService.updateWnNewsById(id,status);
+    public Boolean updateWnNewsById(@RequestParam Integer id, @RequestParam Integer status) {
+        return wmNewsService.updateWnNewsById(id, status);
     }
 }
 

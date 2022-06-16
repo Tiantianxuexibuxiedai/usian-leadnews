@@ -2,27 +2,29 @@ package com.example.admin.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.admin.constants.CommonConstant;
+import com.example.admin.feign.ApArticleFeign;
 import com.example.admin.feign.WmNewsFeign;
 import com.example.admin.mapper.AdSensitiveMapper;
+import com.example.admin.mapper.ChannelMapper;
 import com.example.admin.service.WnNewsCheckService;
 import com.example.admin.utils.FastDFSClientUtil;
 import com.usian.common.aliyun.AliyunImageScanRequest;
 import com.usian.common.aliyun.AliyunTextScanRequest;
+import com.usian.model.admin.pojos.AdChannel;
 import com.usian.model.admin.pojos.AdSensitive;
+import com.usian.model.article.dtos.ApArticleAddDto;
 import com.usian.model.media.dtos.ContentDto;
 import com.usian.model.media.pojos.WmNews;
 import com.usian.utils.common.SensitiveWordUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,6 +34,10 @@ public class WnNewsCheckServiceImpl implements WnNewsCheckService {
     private String fileServerUrl;
     @Autowired
     private WmNewsFeign wmNewsFeign;
+    @Autowired
+    private ChannelMapper channelMapper;
+    @Autowired
+    private ApArticleFeign apArticleFeign;
     @Autowired
     private AdSensitiveMapper adSensitiveMapper;
     @Autowired
@@ -67,6 +73,7 @@ public class WnNewsCheckServiceImpl implements WnNewsCheckService {
             try {
                 //获取审核结果
                 String textResult = aliyunTextScanRequest.textScanRequest(contentAndTitle);
+                log.info("文本审核结果:{}", textResult);
                 if (textResult.equals(CommonConstant.ALIYUN_CHECK_PASS)) {
                     //审核通过 进行图片审核
                     //获取需要校验的图片
@@ -76,25 +83,41 @@ public class WnNewsCheckServiceImpl implements WnNewsCheckService {
                     List<byte[]> img = downloadImg(checkImg);
                     //发送阿里云审核
                     String imgResult = aliyunImageScanRequest.imageScan(img);
-                    log.info(imgResult);
-                    if (imgResult.equals(CommonConstant.ALIYUN_CHECK_PASS)) {
+                    log.info("图片审核结果:{}", imgResult);
+                    //此处审核是违规图片在素材出会审核失误
+                    switch (imgResult) {
+                        case CommonConstant.ALIYUN_CHECK_PASS:
+                            //发布文章 修改状态 保存文章
+                            releaseWmNews(wmNews);
+                            break;
+                        case CommonConstant.ALIYUN_CHECK_BLOCK:
+                            //图片审核不通过 修改状态
+                            wmNewsFeign.updateWnNewsById(wmNews.getId(), 2);
+                            break;
+                        case CommonConstant.ALIYUN_CHECK_REVIEW:
+                            //图片审核不确定 修改状态 需要人工审核
+                            wmNewsFeign.updateWnNewsById(wmNews.getId(), 3);
+                            break;
+                    }
+                   /* if (imgResult.equals(CommonConstant.ALIYUN_CHECK_PASS)) {
                         //图片审核通过 修改状态通过
-                        wmNewsFeign.updateWnNewsById(wmNews.getId(),8);
-
-                    } else if (imgResult.equals(CommonConstant.ALIYUN_CHECK_BLOCK)) {
+                        wmNewsFeign.updateWnNewsById(wmNews.getId(), 8);
+                    }
+                    if (imgResult.equals(CommonConstant.ALIYUN_CHECK_BLOCK)) {
                         //图片审核不通过 修改状态
                         wmNewsFeign.updateWnNewsById(wmNews.getId(), 2);
                     }
                     if (imgResult.equals(CommonConstant.ALIYUN_CHECK_REVIEW)) {
                         //图片审核不确定 修改状态 需要人工审核
                         wmNewsFeign.updateWnNewsById(wmNews.getId(), 3);
-                    }
+                    }*/
 
-                } else if (textResult.equals(CommonConstant.ALIYUN_CHECK_BLOCK)) {
+                }
+                if (textResult.equals(CommonConstant.ALIYUN_CHECK_BLOCK)) {
                     //审核不通过 修改状态
                     wmNewsFeign.updateWnNewsById(wmNews.getId(), 2);
-
-                } else if (textResult.equals(CommonConstant.ALIYUN_CHECK_REVIEW)) {
+                }
+                if (textResult.equals(CommonConstant.ALIYUN_CHECK_REVIEW)) {
                     //审核不确定 修改状态 需要人工审核
                     wmNewsFeign.updateWnNewsById(wmNews.getId(), 3);
                 }
@@ -103,6 +126,42 @@ public class WnNewsCheckServiceImpl implements WnNewsCheckService {
             }
         }
         return null;
+    }
+
+    /**
+     * 文章发布
+     *
+     * @param wmNews
+     */
+    private void releaseWmNews(WmNews wmNews) {
+        //转为时间戳比较
+        long publishTime = wmNews.getPublishTime().getTime();
+        long nowTime = new Date().getTime();
+        //如果当前时间大于发布时间
+        if (nowTime >= publishTime) {
+            //立即发布 修改状态已发布
+            wmNewsFeign.updateWnNewsById(wmNews.getId(), 9);
+            ApArticleAddDto apArticleAddDto = new ApArticleAddDto();
+            AdChannel adChannel = channelMapper.selectById(wmNews.getChannelId());
+            //把wmNews内容复制到apArticleAddDto
+            BeanUtils.copyProperties(wmNews, apArticleAddDto);
+            if (adChannel != null) {
+                apArticleAddDto.setChannelName(adChannel.getName());
+            }
+            apArticleAddDto.setAuthorId(wmNews.getUserId());
+            apArticleAddDto.setLayout(wmNews.getType());
+
+            //保存到article文章表
+            Boolean result = apArticleFeign.addArticle(apArticleAddDto);
+            if (!result) {
+                log.info("调用微服务article失败");
+            }
+        } else {
+            //图片审核通过 修改状态通过待发布
+            wmNewsFeign.updateWnNewsById(wmNews.getId(), 8);
+        }
+
+
     }
 
     /**
@@ -190,7 +249,7 @@ public class WnNewsCheckServiceImpl implements WnNewsCheckService {
      */
     public List<byte[]> downloadImg(List<String> imgUrlList) {
         List<byte[]> list = new ArrayList<>();
-//imgUrlList:["/group1/M00/00/pic.jpg","/group1/M00/00/pic.jpg"]
+//imgUrlList:["group1/M00/00/pic.jpg","group1/M00/00/pic.jpg"]
         for (String imgUrl : imgUrlList) {
             int i = imgUrl.indexOf("/");
             String group = imgUrl.substring(0, i);
