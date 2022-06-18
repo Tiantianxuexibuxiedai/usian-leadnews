@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wemedia.mapper.NewsMapper">
+
+    <select id="queryWnNewsVoById" resultType="com.usian.model.media.vos.WmNewsVo"
+            parameterType="java.lang.Integer">
+        select news.*,
+              /* news.title,
+               news.user_id,
+               news.content,
+               news.type,
+               news.labels,
+               news.channel_id,
+               news.created_time,
+               news.article_id,
+               news.is_delete,
+               news.status,*/
+               user.name as name
+        from wm_news news
+                 left join
+             wm_user user
+        on news.user_id = user.id
+        where news.id=#{id}
+    </select>
+<!--    <resultMap id="WmNewsVoMap" type="com.usian.model.media.vos.WmNewsVo">
+<id column="id" property="id"></id>
+<id column="title" property="title"></id>
+<id column="user_id" property="userId"></id>
+<id column="content" property="content"></id>
+<id column="type" property="type"></id>
+<id column="labels" property="labels"></id>
+<id column="channel_id" property="channelId"></id>
+<id column="created_time" property="createdTime"></id>
+<id column="article_id" property="articleId"></id>
+<id column="status" property="status"></id>
+<id column="is_delete" property="isDelete"></id>
+    </resultMap>-->
+
+</mapper>

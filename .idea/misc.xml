@@ -11,7 +11,6 @@
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/usian-leadnews-admin/pom.xml" />
         <option value="$PROJECT_DIR$/usian-leadnews-admin-gateway/pom.xml" />
-        <option value="$PROJECT_DIR$/usian-leadnews-user/pom.xml" />
         <option value="$PROJECT_DIR$/usian-leadnews-wemedia/pom.xml" />
         <option value="$PROJECT_DIR$/usian-leadnews-article/pom.xml" />
         <option value="$PROJECT_DIR$/usain-leadnews-seata/pom.xml" />

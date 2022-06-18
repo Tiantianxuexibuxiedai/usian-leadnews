@@ -39,7 +39,8 @@ public class AliyunTextScanRequest {
      * @throws Exception
      */
     public String textScanRequest(String content) throws Exception {
-        IClientProfile profile = DefaultProfile.getProfile("cn-shanghai", "LTAI5tCT8XtShYeJN3aitBsB", "3F4PRn5CFGPDVG7et0LQOfKS5w7Ahi");
+        IClientProfile profile = DefaultProfile.getProfile("cn-shanghai", "LTAI5t8BvctyWxaj5xVUbB5k", "MgwAkZ4SJjCzu3fBnZ4KrKgWvdPGX2");
+
         IAcsClient client = new DefaultAcsClient(profile);
         TextScanRequest textScanRequest = new TextScanRequest();
         textScanRequest.setAcceptFormat(FormatType.JSON); // 指定api返回格式

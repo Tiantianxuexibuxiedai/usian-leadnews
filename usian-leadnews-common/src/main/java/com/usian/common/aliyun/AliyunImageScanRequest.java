@@ -37,7 +37,7 @@ public class AliyunImageScanRequest {
 
     public  String imageScan(List<byte[]> imageList) throws Exception {
         IClientProfile profile = DefaultProfile
-                .getProfile("cn-shanghai", "LTAI5tCT8XtShYeJN3aitBsB", "3F4PRn5CFGPDVG7et0LQOfKS5w7Ahi");
+                .getProfile("cn-shanghai", "LTAI5t8BvctyWxaj5xVUbB5k", "MgwAkZ4SJjCzu3fBnZ4KrKgWvdPGX2");
         DefaultProfile
                 .addEndpoint("cn-shanghai", "cn-shanghai", "Green", "green.cn-shanghai.aliyuncs.com");
         IAcsClient client = new DefaultAcsClient(profile);

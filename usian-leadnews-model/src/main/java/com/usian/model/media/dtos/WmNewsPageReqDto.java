@@ -12,7 +12,7 @@ public class WmNewsPageReqDto extends PageRequestDto {
     /**
      * 状态
      */
-    private Short status;
+    private Integer status;
     /**
      * 关键字
      */

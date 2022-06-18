@@ -1,8 +1,8 @@
 server:
-  port: 9999
+  port: 9991
 spring:
   application:
-    name: usian-leadnews-admin-gateway
+    name: usian-leadnews-article-gateway
   cloud:
     gateway:
       globalcors:
@@ -15,14 +15,15 @@ spring:
               - PUT
               - DELETE
       routes:
-        - id: usian-leadnews-admin
-          uri: lb://usian-leadnews-admin
+        - id: usian-leadnews-article
+          uri: lb://usian-leadnews-article
           predicates:
-            - Path=/admin/**
+            - Path=/article/**
           filters:
             - StripPrefix= 1
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+
 
 

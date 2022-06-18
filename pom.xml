@@ -19,6 +19,7 @@
         <module>usian-leadnews-wemedia</module>
         <module>usain-leadnews-seata</module>
         <module>usian-leadnews-article</module>
+        <module>usian-leadnews-article-gateway</module>
     </modules>
 
     <!-- 继承Spring boot工程 -->

@@ -9,7 +9,9 @@ import com.usian.model.common.dtos.ResponseResult;
 import com.usian.model.common.enums.AppHttpCodeEnum;
 import com.usian.model.media.dtos.WmNewsDto;
 import com.usian.model.media.dtos.WmNewsPageReqDto;
+import com.usian.model.media.dtos.WmNewsTitleStatusPageDto;
 import com.usian.model.media.pojos.WmNews;
+import com.usian.model.media.vos.WmNewsVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -124,5 +126,42 @@ public class WmNewsController {
     public Boolean updateWnNewsById(@RequestParam Integer id, @RequestParam Integer status) {
         return wmNewsService.updateWnNewsById(id, status);
     }
+
+    /**
+     * 根据文章状态和标题查询文章列表（人工审核3）
+     *
+     * @param wmNewsTitleStatusPageDto
+     * @param
+     * @return
+     */
+    @PostMapping("/queryWnNewsByParam")
+    public List<WmNews> queryWnNewsByParam(@RequestBody WmNewsTitleStatusPageDto wmNewsTitleStatusPageDto) {
+        return wmNewsService.queryWnNewsByParam(wmNewsTitleStatusPageDto);
+    }
+
+    /**
+     * 根据文章id查询文章信息
+     *
+     * @param id
+     * @return
+     */
+    //@GetMapping("/queryWnNewsById/{id}")
+    @GetMapping("/queryWnNewsVoById")
+    //路径变量
+    //public WmNews queryWnNewsById(@PathVariable Integer id)
+    public WmNewsVo queryWnNewsVoById(@RequestParam Integer id) {
+        return wmNewsService.queryWnNewsVoById(id);
+    }
+
+    /**
+     * 根据newsId更新articleId
+     * @param
+     * @return
+     */
+    @GetMapping("/updateArticleIdById")
+    public int updateArticleIdById(Integer newsId,Long articleId) {
+        return wmNewsService.updateArticleIdById(newsId,articleId);
+    }
+
 }
 

@@ -4,21 +4,24 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.wemedia.mapper.WmMaterielMapper;
-import com.example.wemedia.mapper.WmNewsMapper;
-import com.example.wemedia.mapper.WmNewsMaterielMapper;
+import com.example.wemedia.mapper.*;
 import com.example.wemedia.service.WmNewsService;
 import com.example.wemedia.utils.FastDFSClientUtil;
+import com.usian.model.article.pojos.ApArticle;
 import com.usian.model.common.dtos.PageResponseResult;
 import com.usian.model.common.dtos.ResponseResult;
 import com.usian.model.common.enums.AppHttpCodeEnum;
 import com.usian.model.media.dtos.ContentDto;
 import com.usian.model.media.dtos.WmNewsDto;
 import com.usian.model.media.dtos.WmNewsPageReqDto;
+import com.usian.model.media.dtos.WmNewsTitleStatusPageDto;
 import com.usian.model.media.pojos.WmMaterial;
 import com.usian.model.media.pojos.WmNews;
 import com.usian.model.media.pojos.WmNewsMaterial;
+import com.usian.model.media.pojos.WmUser;
+import com.usian.model.media.vos.WmNewsVo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,10 @@ public class WmNewsServiceImpl implements WmNewsService {
     private String fileServerUrl;
     @Autowired
     private WmNewsMapper wmNewsMapper;
+    @Autowired
+    private WmUserMapper wmUserMapper;
+    @Autowired
+    private NewsMapper newsMapper;
     @Autowired
     private WmMaterielMapper wmMaterielMapper;
     @Autowired
@@ -226,6 +233,46 @@ public class WmNewsServiceImpl implements WmNewsService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<WmNews> queryWnNewsByParam(WmNewsTitleStatusPageDto wmNewsTitleStatusPageDto) {
+        if (wmNewsTitleStatusPageDto.getStatus() == null) {
+            log.info("状态不可以为空");
+        }
+        LambdaQueryWrapper<WmNews> queryWrapper = new LambdaQueryWrapper<>();
+        if (wmNewsTitleStatusPageDto.getTitle() != null && !wmNewsTitleStatusPageDto.getTitle().equals("")) {
+            queryWrapper.eq(WmNews::getTitle, wmNewsTitleStatusPageDto.getTitle());
+        }
+        //也可以不传状态写死
+        queryWrapper.eq(WmNews::getStatus, 3).or().eq(WmNews::getStatus, 2);
+        //queryWrapper.eq(WmNews::getStatus, wmNewsTitleStatusPageDto.getStatus());
+        IPage<WmNews> page = new Page<>(wmNewsTitleStatusPageDto.getPage(), wmNewsTitleStatusPageDto.getSize());
+        List<WmNews> wmNewsIPage = wmNewsMapper.selectPage(page, queryWrapper).getRecords();
+        return wmNewsIPage;
+    }
+
+    @Override
+    public WmNewsVo queryWnNewsVoById(Integer id) {
+      /*  WmNewsVo wmNewsVo = new WmNewsVo();
+        WmNews wmNews = wmNewsMapper.selectById(id);
+        if (wmNews == null) {
+            return null;
+        }
+        BeanUtils.copyProperties(wmNews, wmNewsVo);
+        WmUser wmUser = wmUserMapper.selectById(wmNews.getUserId());
+        if (wmUser != null) {
+            wmNewsVo.setName(wmUser.getName());
+        }*/
+        return newsMapper.queryWnNewsVoById(id);
+        //    return wmNewsVo;
+    }
+
+    @Override
+    public int updateArticleIdById(Integer newsId, Long articleId) {
+        WmNews wmNews = wmNewsMapper.selectById(newsId);
+        wmNews.setArticleId(articleId);
+        return wmNewsMapper.updateById(wmNews);
     }
 
 

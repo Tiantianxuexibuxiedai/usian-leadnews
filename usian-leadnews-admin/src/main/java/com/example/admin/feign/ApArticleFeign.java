@@ -14,5 +14,5 @@ public interface ApArticleFeign {
      * @return
      */
     @PostMapping("/api/v1/article/addArticle")
-    Boolean addArticle(@RequestBody ApArticleAddDto apArticleAddDto);
+    Long addArticle(@RequestBody ApArticleAddDto apArticleAddDto);
 }

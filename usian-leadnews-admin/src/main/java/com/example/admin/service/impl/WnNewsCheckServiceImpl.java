@@ -13,8 +13,11 @@ import com.usian.common.aliyun.AliyunTextScanRequest;
 import com.usian.model.admin.pojos.AdChannel;
 import com.usian.model.admin.pojos.AdSensitive;
 import com.usian.model.article.dtos.ApArticleAddDto;
+import com.usian.model.common.dtos.ResponseResult;
+import com.usian.model.common.enums.AppHttpCodeEnum;
 import com.usian.model.media.dtos.ContentDto;
 import com.usian.model.media.pojos.WmNews;
+import com.usian.model.media.vos.WmNewsVo;
 import com.usian.utils.common.SensitiveWordUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -60,6 +63,11 @@ public class WnNewsCheckServiceImpl implements WnNewsCheckService {
             log.info("查询文章信息出错");
             return false;
         }
+        //如果状态是4或者8走发布
+        if (wmNews.getStatus()==4||wmNews.getStatus()==8){
+            releaseWmNews(wmNews);
+        }
+
         //状态为1的待审核 进行审核
         if (wmNews.getStatus() == 1) {
             //获取文本信息做敏感词审查
@@ -119,7 +127,8 @@ public class WnNewsCheckServiceImpl implements WnNewsCheckService {
                 }
                 if (textResult.equals(CommonConstant.ALIYUN_CHECK_REVIEW)) {
                     //审核不确定 修改状态 需要人工审核
-                    wmNewsFeign.updateWnNewsById(wmNews.getId(), 3);
+                  wmNewsFeign.updateWnNewsById(wmNews.getId(), 3);
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -127,6 +136,21 @@ public class WnNewsCheckServiceImpl implements WnNewsCheckService {
         }
         return null;
     }
+
+    @Override
+    public ResponseResult queryNewsVoById(Integer newsId) {
+
+        if (newsId == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+        WmNewsVo wmNewsVo = wmNewsFeign.queryWnNewsVoById(newsId);
+        if (wmNewsVo == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST);
+        }
+        return ResponseResult.okResult(wmNewsVo);
+
+    }
+
 
     /**
      * 文章发布
@@ -152,9 +176,13 @@ public class WnNewsCheckServiceImpl implements WnNewsCheckService {
             apArticleAddDto.setLayout(wmNews.getType());
 
             //保存到article文章表
-            Boolean result = apArticleFeign.addArticle(apArticleAddDto);
-            if (!result) {
-                log.info("调用微服务article失败");
+            Long articleId = apArticleFeign.addArticle(apArticleAddDto);
+            if (articleId!=null) {
+                log.info("调用微服务自媒体保存文章");
+                int i = wmNewsFeign.updateArticleIdById(wmNews.getId(), articleId);
+                if(i>0){
+                    log.info("update WmNews articleId success");
+                }
             }
         } else {
             //图片审核通过 修改状态通过待发布
